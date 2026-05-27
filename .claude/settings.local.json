@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat /tmp/notizen_unpacked/word/document.xml | sed 's/<[^>]*>//g' | tr -s ' \\\\n' '\\\\n' | tail -100)",
+      "Bash(mkdir -p /c/Users/andin/Desktop/Schule/SYP/react-native-apps-with-supabase/.claude/commands)"
+    ]
+  }
+}

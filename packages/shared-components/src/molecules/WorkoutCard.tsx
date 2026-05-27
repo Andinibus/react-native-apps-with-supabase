@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { WorkoutDifficulty } from '@workout/shared-types';
 import { formatWorkoutDuration } from '@workout/shared-utils';
 
-import { kineticTheme } from './kineticTheme';
+import { kineticTheme } from '../kineticTheme';
 
 const { colors, spacing, radius, typography } = kineticTheme;
 

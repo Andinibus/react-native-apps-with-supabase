@@ -1,277 +1,154 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
-import { WorkoutCard } from '@workout/shared-components';
+import { AdminModerationScreen } from './screens/AdminModerationScreen';
 
-const adminPreview = [
-  {
-    id: 'plan-001',
-    title: 'Starter Strength Plan',
-    durationInMinutes: 30,
-    difficulty: 'Beginner'
-  },
-  {
-    id: 'plan-002',
-    title: 'Performance Split',
-    durationInMinutes: 55,
-    difficulty: 'Advanced'
-  }
-] as const;
-
-type HealthStatus = 'idle' | 'loading' | 'healthy' | 'unhealthy';
-
-function getCurrentPathname(): string {
-  const maybeWindow = globalThis as { window?: { location?: { pathname?: string } } };
-  return maybeWindow.window?.location?.pathname ?? '/';
-}
-
-function setPathname(pathname: string): void {
-  const maybeWindow = globalThis as {
-    window?: {
-      history?: { pushState: (data: unknown, title: string, url?: string | URL | null) => void };
-      dispatchEvent?: (event: Event) => boolean;
-    };
-  };
-
-  if (!maybeWindow.window?.history?.pushState || !maybeWindow.window.dispatchEvent) {
-    return;
-  }
-
-  maybeWindow.window.history.pushState({}, '', pathname);
-  maybeWindow.window.dispatchEvent(new Event('popstate'));
-}
+type AdminRoute = '/moderation' | '/health';
 
 export default function App() {
-  const [pathname, setPathnameState] = useState(getCurrentPathname());
-  const [healthStatus, setHealthStatus] = useState<HealthStatus>('idle');
+  const [route, setRoute] = useState<AdminRoute>('/moderation');
+  const [healthStatus, setHealthStatus] = useState<'idle' | 'loading' | 'healthy' | 'unhealthy'>('idle');
   const [healthMessage, setHealthMessage] = useState('Noch kein Check ausgefuehrt.');
 
-  const healthEndpoint = useMemo(() => {
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-
-    if (!supabaseUrl) {
-      return null;
-    }
-
-    return `${supabaseUrl}/functions/v1/client-connection-check`;
-  }, []);
-
-  useEffect(() => {
-    const maybeWindow = globalThis as {
-      window?: {
-        addEventListener?: (type: string, listener: () => void) => void;
-        removeEventListener?: (type: string, listener: () => void) => void;
-      };
-    };
-
-    const syncPath = () => setPathnameState(getCurrentPathname());
-
-    maybeWindow.window?.addEventListener?.('popstate', syncPath);
-
-    return () => {
-      maybeWindow.window?.removeEventListener?.('popstate', syncPath);
-    };
-  }, []);
+  const healthEndpoint = process.env.EXPO_PUBLIC_SUPABASE_URL
+    ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/client-connection-check`
+    : null;
 
   async function runHealthCheck() {
     if (!healthEndpoint) {
       setHealthStatus('unhealthy');
-      setHealthMessage('EXPO_PUBLIC_SUPABASE_URL fehlt. Bitte in der Admin-App konfigurieren.');
+      setHealthMessage('EXPO_PUBLIC_SUPABASE_URL fehlt.');
       return;
     }
-
     try {
       setHealthStatus('loading');
       setHealthMessage('Verbindung wird geprueft...');
-
+      const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
       const response = await fetch(healthEndpoint, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`
         }
       });
-
       const payload = (await response.json()) as { ok?: boolean; message?: string; error?: string };
-
       if (!response.ok || !payload.ok) {
         setHealthStatus('unhealthy');
         setHealthMessage(payload.error ?? 'Health-Check fehlgeschlagen.');
         return;
       }
-
       setHealthStatus('healthy');
-      setHealthMessage(payload.message ?? 'Verbindung zur Edge Function ist gesund.');
+      setHealthMessage(payload.message ?? 'Verbindung ist gesund.');
     } catch {
       setHealthStatus('unhealthy');
       setHealthMessage('Verbindung konnte nicht hergestellt werden.');
     }
   }
 
-  const isHealthPage = pathname === '/health';
-
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.navigationRow}>
-          <Pressable onPress={() => setPathname('/')} style={[styles.navButton, !isHealthPage && styles.navButtonActive]}>
-            <Text style={[styles.navButtonText, !isHealthPage && styles.navButtonTextActive]}>Dashboard</Text>
+    <SafeAreaView style={styles.root}>
+      {/* Top Navigation */}
+      <View style={styles.topNav}>
+        <Text style={styles.appName}>KINETIC <Text style={styles.appNameSub}>Admin</Text></Text>
+        <View style={styles.navTabs}>
+          <Pressable
+            onPress={() => setRoute('/moderation')}
+            style={[styles.navTab, route === '/moderation' && styles.navTabActive]}
+          >
+            <Text style={[styles.navTabText, route === '/moderation' && styles.navTabTextActive]}>
+              Moderation
+            </Text>
           </Pressable>
-          <Pressable onPress={() => setPathname('/health')} style={[styles.navButton, isHealthPage && styles.navButtonActive]}>
-            <Text style={[styles.navButtonText, isHealthPage && styles.navButtonTextActive]}>Health</Text>
+          <Pressable
+            onPress={() => setRoute('/health')}
+            style={[styles.navTab, route === '/health' && styles.navTabActive]}
+          >
+            <Text style={[styles.navTabText, route === '/health' && styles.navTabTextActive]}>
+              Health
+            </Text>
           </Pressable>
         </View>
+      </View>
 
-        {!isHealthPage ? (
-          <>
-            <Text style={styles.heading}>Admin App</Text>
-            <Text style={styles.subheading}>Web-Frontend fuer Planung, Kuration und Verwaltung von Workout-Inhalten.</Text>
-            <View style={styles.grid}>
-              {adminPreview.map((workout) => (
-                <WorkoutCard
-                  key={workout.id}
-                  title={workout.title}
-                  durationInMinutes={workout.durationInMinutes}
-                  difficulty={workout.difficulty}
-                />
-              ))}
-            </View>
-          </>
-        ) : (
+      {/* Content */}
+      <View style={styles.content}>
+        {route === '/moderation' && <AdminModerationScreen />}
+
+        {route === '/health' && (
           <View style={styles.healthCard}>
-            <Text style={styles.heading}>Health Page</Text>
-            <Text style={styles.subheading}>Prueft die Erreichbarkeit der Supabase Edge Function vom Admin-Client.</Text>
-            <Text style={styles.label}>Endpoint</Text>
-            <Text style={styles.endpointText}>{healthEndpoint ?? 'Nicht konfiguriert'}</Text>
-            <View style={styles.statusRow}>
-              <Text style={styles.label}>Status</Text>
-              <Text
-                style={[
-                  styles.statusPill,
-                  healthStatus === 'healthy' && styles.statusHealthy,
-                  healthStatus === 'unhealthy' && styles.statusUnhealthy,
-                  healthStatus === 'loading' && styles.statusLoading
-                ]}
-              >
-                {healthStatus.toUpperCase()}
-              </Text>
+            <Text style={styles.healthTitle}>System Health</Text>
+            <Text style={styles.healthSubtitle}>Supabase Edge Function Verbindungstest</Text>
+
+            <View style={styles.endpointRow}>
+              <Text style={styles.fieldLabel}>ENDPOINT</Text>
+              <Text style={styles.endpointText}>{healthEndpoint ?? 'Nicht konfiguriert'}</Text>
             </View>
+
+            <View style={styles.statusRow}>
+              <Text style={styles.fieldLabel}>STATUS</Text>
+              <View style={[
+                styles.statusPill,
+                healthStatus === 'healthy' && styles.statusHealthy,
+                healthStatus === 'unhealthy' && styles.statusUnhealthy,
+                healthStatus === 'loading' && styles.statusLoading
+              ]}>
+                <Text style={styles.statusText}>{healthStatus.toUpperCase()}</Text>
+              </View>
+            </View>
+
             <Text style={styles.healthMessage}>{healthMessage}</Text>
-            <Pressable onPress={runHealthCheck} style={styles.healthButton}>
-              <Text style={styles.healthButtonText}>Health-Check ausfuehren</Text>
+
+            <Pressable onPress={runHealthCheck} style={styles.checkBtn}>
+              <Text style={styles.checkBtnText}>Health-Check ausfuehren</Text>
             </Pressable>
           </View>
         )}
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fffaf2'
-  },
-  content: {
-    padding: 32,
-    gap: 24
-  },
-  navigationRow: {
+  root: { flex: 1, backgroundColor: '#141408' },
+  topNav: {
     flexDirection: 'row',
-    gap: 12
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#1d1c10',
+    borderBottomWidth: 1,
+    borderBottomColor: '#494832'
   },
-  navButton: {
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#ffffff'
-  },
-  navButtonActive: {
-    backgroundColor: '#111827',
-    borderColor: '#111827'
-  },
-  navButtonText: {
-    color: '#374151',
-    fontWeight: '600'
-  },
-  navButtonTextActive: {
-    color: '#ffffff'
-  },
-  heading: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: '#111827'
-  },
-  subheading: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#4b5563',
-    maxWidth: 720
-  },
-  grid: {
-    gap: 16,
-    maxWidth: 720
-  },
+  appName: { fontSize: 18, fontWeight: '700', color: '#ede900', letterSpacing: 2 },
+  appNameSub: { color: '#a4c9ff', fontWeight: '400', letterSpacing: 1 },
+  navTabs: { flexDirection: 'row', gap: 4 },
+  navTab: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: '#2b2b1d', borderWidth: 1, borderColor: '#494832' },
+  navTabActive: { backgroundColor: '#ede900', borderColor: '#ede900' },
+  navTabText: { fontSize: 13, fontWeight: '600', color: '#949277' },
+  navTabTextActive: { color: '#1d1d00' },
+  content: { flex: 1 },
   healthCard: {
-    maxWidth: 720,
-    gap: 14,
-    backgroundColor: '#ffffff',
+    margin: 20,
+    backgroundColor: '#212013',
     borderRadius: 20,
     padding: 24,
+    gap: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb'
+    borderColor: '#494832'
   },
-  label: {
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    color: '#6b7280',
-    fontWeight: '700'
-  },
-  endpointText: {
-    fontSize: 14,
-    color: '#111827'
-  },
-  statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  statusPill: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    fontSize: 12,
-    color: '#374151',
-    backgroundColor: '#e5e7eb',
-    fontWeight: '700'
-  },
-  statusHealthy: {
-    backgroundColor: '#d1fae5',
-    color: '#065f46'
-  },
-  statusUnhealthy: {
-    backgroundColor: '#fee2e2',
-    color: '#991b1b'
-  },
-  statusLoading: {
-    backgroundColor: '#fef3c7',
-    color: '#92400e'
-  },
-  healthMessage: {
-    fontSize: 14,
-    color: '#1f2937'
-  },
-  healthButton: {
-    backgroundColor: '#0f766e',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    alignSelf: 'flex-start'
-  },
-  healthButtonText: {
-    color: '#ecfeff',
-    fontWeight: '700'
-  }
+  healthTitle: { fontSize: 22, fontWeight: '700', color: '#e6e3ce' },
+  healthSubtitle: { fontSize: 14, color: '#949277', marginTop: -8 },
+  endpointRow: { gap: 6 },
+  fieldLabel: { fontSize: 11, fontWeight: '700', color: '#949277', textTransform: 'uppercase', letterSpacing: 0.5 },
+  endpointText: { fontSize: 13, color: '#cbc8ab' },
+  statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  statusPill: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: '#2b2b1d', borderWidth: 1, borderColor: '#494832' },
+  statusHealthy: { backgroundColor: '#99f1f320', borderColor: '#99f1f3' },
+  statusUnhealthy: { backgroundColor: '#ffb4ab20', borderColor: '#ffb4ab' },
+  statusLoading: { backgroundColor: '#ede90020', borderColor: '#ede900' },
+  statusText: { fontSize: 12, fontWeight: '700', color: '#e6e3ce' },
+  healthMessage: { fontSize: 14, color: '#cbc8ab' },
+  checkBtn: { backgroundColor: '#ede900', borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  checkBtnText: { fontSize: 15, fontWeight: '700', color: '#1d1d00' }
 });
