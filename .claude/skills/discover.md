@@ -1,24 +1,29 @@
-# Discover Skill — Projektübersicht & Skill-Guide
+---
+name: discover
+description: Zeigt Projektübersicht, alle verfügbaren Skills und den typischen CDD-Workflow für die Kinetic Workout App.
+---
+
+# Discover — Projektübersicht & Skill-Guide
 
 Zeige alle verfügbaren Skills und wie der Workflow für neue Komponenten aussieht.
 
 ## Verfügbare Skills
 
-| Befehl | Wann verwenden | Beispiel |
+| Skill | Wann verwenden | Beispiel |
 |---|---|---|
-| `/discover` | Übersicht aller Skills anzeigen | `/discover` |
-| `/breakdown` | Aufgabe ist groß und unklar — erst in Schritte zerlegen | `/breakdown Neues Ernährungs-Feature` |
-| `/new-component` | Neue Komponente von Grund auf erstellen + Story | `/new-component molecule NutritionLabel` |
-| `/gen-stories` | Komponenten ohne Story nachträglich mit Stories versehen | `/gen-stories` oder `/gen-stories atoms` |
-| `/validate-execute` | Konkrete Implementierung mit Plan → Validate → Execute | `/validate-execute Button-Variante danger hinzufügen` |
+| `discover` | Übersicht aller Skills anzeigen | `discover` |
+| `breakdown` | Aufgabe ist groß und unklar — erst in Schritte zerlegen | `breakdown Neues Ernährungs-Feature` |
+| `new-component` | Neue Komponente von Grund auf erstellen + Story | `new-component molecule NutritionLabel` |
+| `gen-stories` | Komponenten ohne Story nachträglich mit Stories versehen | `gen-stories` oder `gen-stories atoms` |
+| `validate-execute` | Konkrete Implementierung mit Plan → Validate → Execute | `validate-execute Button-Variante danger hinzufügen` |
 
 ---
 
 ## Typischer Workflow: Neue Komponente
 
 ```
-1.  /breakdown   →  Aufgabe analysieren, Abhängigkeiten klären
-2.  /new-component <ebene> <Name>  →  Komponente + Story implementieren
+1.  breakdown   →  Aufgabe analysieren, Abhängigkeiten klären
+2.  new-component <ebene> <Name>  →  Komponente + Story implementieren
 3.  npm run check-types  →  TypeScript validieren (0 Fehler)
 4.  npm run storybook    →  Visuell im Browser prüfen
 ```

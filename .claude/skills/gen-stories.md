@@ -1,18 +1,23 @@
-# Gen-Stories Skill — Fehlende Storybook Stories generieren
+---
+name: gen-stories
+description: Scannt alle Komponenten in shared-components und generiert für jede Komponente ohne Story automatisch eine passende .stories.tsx. Optional mit "atoms", "molecules" oder "organisms" einschränken.
+---
+
+# Gen-Stories — Fehlende Storybook Stories generieren
 
 Scannt alle Komponenten in `shared-components` und generiert für jede Komponente ohne Story automatisch eine passende `.stories.tsx`.
 
 ## Aufruf
 
 ```
-/gen-stories
+gen-stories
 ```
 
 Optional: nur eine bestimmte Ebene scannen:
 ```
-/gen-stories atoms
-/gen-stories molecules
-/gen-stories organisms
+gen-stories atoms
+gen-stories molecules
+gen-stories organisms
 ```
 
 ---

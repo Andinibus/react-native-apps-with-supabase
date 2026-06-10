@@ -1,18 +1,23 @@
-# Worker Agent — Validate & Execute
+---
+name: validate-execute
+description: Implementiert eine Komponente oder Änderung nach dem Muster Plan → Validate → Execute → Verify. Verhindert typische React-Native-Fehler und prüft nach jeder Datei den TypeScript-Stand.
+---
+
+# Validate & Execute — Plan · Validate · Execute · Verify
 
 Implementiert eine Komponente oder Änderung nach dem Muster **Plan → Validate → Execute → Verify**.
 
 ## Aufruf
 
 ```
-/validate-execute <Aufgabenbeschreibung>
+validate-execute <Aufgabenbeschreibung>
 ```
 
 Beispiele:
 ```
-/validate-execute Button-Atom mit Varianten primary, secondary, ghost, danger
-/validate-execute StatCard-Molekül zeigt value, label und optionalen accent-Modus
-/validate-execute index.ts um neue Avatar-Komponente erweitern
+validate-execute Button-Atom mit Varianten primary, secondary, ghost, danger
+validate-execute StatCard-Molekül zeigt value, label und optionalen accent-Modus
+validate-execute index.ts um neue Avatar-Komponente erweitern
 ```
 
 ---

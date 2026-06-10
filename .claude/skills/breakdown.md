@@ -1,18 +1,23 @@
-# Manager Agent — CDD Work Breakdown
+---
+name: breakdown
+description: Zerlegt eine Aufgabe nach Component-Driven Development in geordnete Teilschritte mit CDD-Roadmap und Parallelisierungsregeln.
+---
+
+# Breakdown — CDD Work Breakdown
 
 Zerlege eine Aufgabe nach dem **Component-Driven Development** Prinzip in geordnete Teilschritte.
 
 ## Aufruf
 
 ```
-/breakdown <Aufgabenbeschreibung>
+breakdown <Aufgabenbeschreibung>
 ```
 
 Beispiele:
 ```
-/breakdown Neue Molekül-Komponente "NutritionBadge" mit Kalorien und Makros
-/breakdown WorkoutDetail-Screen mit ExerciseList und Timer
-/breakdown MacroTracker-Feature von DB bis UI
+breakdown Neue Molekül-Komponente "NutritionBadge" mit Kalorien und Makros
+breakdown WorkoutDetail-Screen mit ExerciseList und Timer
+breakdown MacroTracker-Feature von DB bis UI
 ```
 
 ---
@@ -63,7 +68,7 @@ Welche Schritte können gleichzeitig laufen?
 
 Erstelle eine geordnete TODO-Liste mit:
 - Klarer Aufgabenbeschreibung
-- Welcher Skill verwendet wird (`/new-component`, `/validate-execute`, `/gen-stories`)
+- Welcher Skill verwendet wird (`new-component`, `validate-execute`, `gen-stories`)
 - Abhängigkeiten explizit markiert
 
 Starte sofort mit Schritt 1.

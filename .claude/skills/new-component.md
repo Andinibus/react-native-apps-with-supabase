@@ -1,18 +1,23 @@
-# New Component Skill — Atom · Molecule · Organism
+---
+name: new-component
+description: Erstellt eine neue React-Native-Komponente nach Atomic Design inklusive Storybook Story. Aufruf mit Ebene und Name, z.B. "new-component atom IconButton".
+---
+
+# New Component — Atom · Molecule · Organism
 
 Erstellt eine neue React-Native-Komponente nach Atomic Design **inklusive Storybook Story** und verifiziert sie im Storybook-Server.
 
 ## Aufruf
 
 ```
-/new-component <Ebene> <KomponentenName> [Beschreibung]
+new-component <Ebene> <KomponentenName> [Beschreibung]
 ```
 
 Beispiele:
 ```
-/new-component atom IconButton  Ein Button mit Icon links neben dem Label
-/new-component molecule NutritionLabel  Zeigt Kalorien + Makros kompakt in einer Zeile
-/new-component organism MealPlanCard  Wochenkarte mit Mahlzeiten-Übersicht
+new-component atom    IconButton  Ein Button mit Icon links neben dem Label
+new-component molecule NutritionLabel  Zeigt Kalorien + Makros kompakt in einer Zeile
+new-component organism MealPlanCard  Wochenkarte mit Mahlzeiten-Übersicht
 ```
 
 ---
